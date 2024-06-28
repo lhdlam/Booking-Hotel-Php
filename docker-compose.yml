@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    image: php:7.4-apache 
+    container_name: php-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - my-network
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: bluebird_user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: bluebirdhotel
+    command: >
+      bash -c "docker-php-ext-install mysqli && apache2-foreground"
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bluebirdhotel
+      MYSQL_USER: bluebird_user
+      MYSQL_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./src/bluebirdhotel.sql:/docker-entrypoint-initdb.d/bluebirdhotel.sql
+    networks:
+      - my-network
+    ports:
+      - "3307:3306"
+
+networks:
+  my-network:
+
+volumes:
+  db_data:
